@@ -30,8 +30,6 @@
 #include <string>
 #include <type_traits>
 
-#include "rcutils/macros.h"
-
 #include "patch.hpp"
 
 namespace mocking_utils
@@ -61,7 +59,7 @@ constexpr auto USER_WRITABLE = _S_IWRITE;
 // Deal with binary API quirks in 64 bit MacOS.
 #if defined(__MACH__) && defined(_DARWIN_FEATURE_64_BIT_INODE)
 #define MOCKING_UTILS_FILESYSTEM_PATCH_TARGET(scope, function) \
-  (std::string(RCUTILS_STRINGIFY(function) "$INODE64") + "@" + (scope))
+  (std::string( #function) "$INODE64") + "@" + (scope))
 #else
 #define MOCKING_UTILS_FILESYSTEM_PATCH_TARGET MOCKING_UTILS_PATCH_TARGET
 #endif

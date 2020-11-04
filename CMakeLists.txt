@@ -14,15 +14,13 @@ endif()
 find_package(ament_cmake_ros REQUIRED)
 find_package(mimick REQUIRED)
 find_package(mimick_vendor REQUIRED)
-find_package(rcutils REQUIRED)
-
 
 add_library(${PROJECT_NAME} INTERFACE)
-ament_target_dependencies(${PROJECT_NAME} INTERFACE rcutils mimick mimick_vendor)
+ament_target_dependencies(${PROJECT_NAME} INTERFACE mimick mimick_vendor)
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 target_link_libraries(${PROJECT_NAME} INTERFACE mimick)
 
-ament_export_dependencies(ament_cmake rcutils mimick_vendor)
+ament_export_dependencies(ament_cmake mimick_vendor)
 ament_export_include_directories(include)
 
 if(BUILD_TESTING)

@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Original file taken from:
-// https://github.com/ros2/rcutils/blob/master/test/mocking_utils/patch.hpp
-
 #ifndef MOCKING_UTILS__PATCH_HPP_
 #define MOCKING_UTILS__PATCH_HPP_
 
@@ -36,9 +33,6 @@
 #include <utility>
 
 #include "mimick/mimick.h"
-
-#include "rcutils/error_handling.h"
-#include "rcutils/macros.h"
 
 namespace mocking_utils
 {
@@ -519,7 +513,7 @@ auto make_patch(const std::string & target, std::function<SignatureT> proxy)
 /// Compute a Mimick symbol target string based on which `function` is to be patched
 /// in which `scope`.
 #define MOCKING_UTILS_PATCH_TARGET(scope, function) \
-  (std::string(RCUTILS_STRINGIFY(function)) + "@" + (scope))
+  (std::string(#function) + "@" + (scope))
 
 /// Prepare a mocking_utils::Patch for patching a `function` in a given `scope`
 /// but defer applying any changes.
@@ -535,35 +529,6 @@ auto make_patch(const std::string & target, std::function<SignatureT> proxy)
 /// Patch a `function` to always yield a given `return_code` in a given `scope`.
 #define patch_and_return(scope, function, return_code) \
   patch(scope, function, [&](auto && ...) {return return_code;})
-
-/// Patch a `function` to always yield a given `return_code` in a given `scope`.
-#define patch_to_fail(scope, function, error_message, return_code) \
-  patch( \
-    scope, function, [&](auto && ...) { \
-      RCUTILS_SET_ERROR_MSG(error_message); \
-      return return_code; \
-    })
-
-/// Patch a `function` to execute normally but always yield a given `return_code`
-/// in a given `scope`.
-/**
- * \warning On some Linux distributions (e.g. CentOS), pointers to function
- *   reference their PLT trampolines. In such cases, it is not possible to
- *   call `function` from within the mock.
- */
-#define inject_on_return(scope, function, return_code) \
-  patch( \
-    scope, function, ([&, base = function](auto && ... __args) { \
-      if (base != function) { \
-        static_cast<void>(base(std::forward<decltype(__args)>(__args)...)); \
-      } else { \
-        RCUTILS_SAFE_FWRITE_TO_STDERR( \
-          "[WARNING] mocking_utils::inject_on_return() cannot forward call to " \
-          "original '" RCUTILS_STRINGIFY(function) "' function before injection\n" \
-          "    at " __FILE__ ":" RCUTILS_STRINGIFY(__LINE__) "\n"); \
-      } \
-      return return_code; \
-    }))
 
 }  // namespace mocking_utils
 
